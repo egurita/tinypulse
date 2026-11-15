@@ -1,0 +1,228 @@
+{
+  "c_unit_tests": {
+    "checks": 89,
+    "failures": 0,
+    "tests": 21
+  },
+  "equivalence": {
+    "per_subject": {
+      "S1": {
+        "identical_pct": 99.80447534216815,
+        "max_diff_bpm": 1.875,
+        "mae_float": 7.494440301252452,
+        "mae_fixed": 7.494850075817253
+      },
+      "S2": {
+        "identical_pct": 99.90241522322518,
+        "max_diff_bpm": 31.875,
+        "mae_float": 10.015823032949633,
+        "mae_fixed": 10.020884213955933
+      },
+      "S3": {
+        "identical_pct": 99.88550492328831,
+        "max_diff_bpm": 11.25,
+        "mae_float": 5.150530794814983,
+        "mae_fixed": 5.148466453962804
+      },
+      "S4": {
+        "identical_pct": 99.91251093613297,
+        "max_diff_bpm": 11.25,
+        "mae_float": 13.348082205337699,
+        "mae_fixed": 13.346990647904203
+      },
+      "S5": {
+        "identical_pct": 99.978489997849,
+        "max_diff_bpm": 16.875,
+        "mae_float": 14.479262439172278,
+        "mae_fixed": 14.475632626309295
+      },
+      "S6": {
+        "identical_pct": 100.0,
+        "max_diff_bpm": 0.0,
+        "mae_float": 8.305502058621311,
+        "mae_fixed": 8.305502058621311
+      },
+      "S7": {
+        "identical_pct": 100.0,
+        "max_diff_bpm": 0.0,
+        "mae_float": 4.503536026602437,
+        "mae_fixed": 4.503536026602437
+      },
+      "S8": {
+        "identical_pct": 99.92568739162745,
+        "max_diff_bpm": 1.875,
+        "mae_float": 8.956951326564424,
+        "mae_fixed": 8.956486872762095
+      },
+      "S9": {
+        "identical_pct": 99.85971475333177,
+        "max_diff_bpm": 5.625,
+        "mae_float": 15.371295098587261,
+        "mae_fixed": 15.369519103261837
+      },
+      "S10": {
+        "identical_pct": 99.96241308024807,
+        "max_diff_bpm": 20.625,
+        "mae_float": 3.9979402111607643,
+        "mae_fixed": 4.001463984887507
+      },
+      "S11": {
+        "identical_pct": 99.95576199955762,
+        "max_diff_bpm": 11.25,
+        "mae_float": 16.26989614971442,
+        "mae_fixed": 16.26782249344368
+      },
+      "S12": {
+        "identical_pct": 99.89883662114315,
+        "max_diff_bpm": 1.875,
+        "mae_float": 8.391888134637504,
+        "mae_fixed": 8.39105008211652
+      },
+      "S13": {
+        "identical_pct": 99.95618838992333,
+        "max_diff_bpm": 1.875,
+        "mae_float": 6.603547439491631,
+        "mae_fixed": 6.603327171434317
+      },
+      "S14": {
+        "identical_pct": 99.93297587131367,
+        "max_diff_bpm": 24.375,
+        "mae_float": 7.4646403045927014,
+        "mae_fixed": 7.459194594136938
+      },
+      "S15": {
+        "identical_pct": 99.92435703479576,
+        "max_diff_bpm": 1.875,
+        "mae_float": 9.006508777674195,
+        "mae_fixed": 9.006458784556425
+      }
+    },
+    "identical_windows": 64649,
+    "total_windows": 64697,
+    "test_mae_float": 9.72492084767972,
+    "test_mae_fixed": 9.723915370503047,
+    "per_activity_test": {
+      "sitting": [
+        2.3902401525343184,
+        2.387626039366547
+      ],
+      "stairs": [
+        27.129081069468757,
+        27.13658652798404
+      ],
+      "table soccer": [
+        23.739587714549327,
+        23.739587714549327
+      ],
+      "cycling": [
+        10.022745791996751,
+        10.022745791996751
+      ],
+      "driving": [
+        5.300893076178327,
+        5.300551359393198
+      ],
+      "lunch": [
+        4.993836747922668,
+        4.993450983224776
+      ],
+      "walking": [
+        20.164775464273525,
+        20.15697379991846
+      ],
+      "working": [
+        3.7455810041457696,
+        3.7458626625504565
+      ]
+    },
+    "ns_per_sample_c": 553.7709316713655,
+    "ns_per_sample_python": 2556.3441369792395
+  },
+  "cold_start": {
+    "segments": 93,
+    "mae_cold": 17.102532205615844,
+    "mae_warm": 12.568179589274962
+  },
+  "emulator": {
+    "uart_done": {
+      "samples": "7680",
+      "estimates": "57",
+      "mismatches_vs_host": "0",
+      "samples_lost": "0"
+    },
+    "bit_exact_vs_host": true,
+    "estimates": 57,
+    "wall_s": 113.78928349993657,
+    "instr_per_sample_mean": 2474.3708513708516,
+    "instr_per_sample_max": 2501,
+    "instr_per_window_mean": 3379165.3684210526,
+    "instr_per_window_max": 3382029,
+    "instr_per_fifo_read_mean": 2803.0,
+    "instr_total_benchmark": 213424853,
+    "seconds_of_data": 120.0,
+    "instr_per_second_of_data": 1859154.4186982608,
+    "cpu_load_pct_at_120MHz_cpi1": 1.5492953489152175,
+    "window_latency_ms_at_120MHz_cpi1": 28.183574999999998
+  },
+  "memory": {
+    "modules": {
+      "bandpass": {
+        "flash": 188,
+        "ram": 0
+      },
+      "nlms": {
+        "flash": 364,
+        "ram": 0
+      },
+      "spectrum + FFT": {
+        "flash": 960,
+        "ram": 16384
+      },
+      "tracker (mask, HMM, log2)": {
+        "flash": 680,
+        "ram": 0
+      },
+      "estimator glue": {
+        "flash": 592,
+        "ram": 0
+      },
+      "MAX30102 driver": {
+        "flash": 844,
+        "ram": 0
+      },
+      "tables (coefs, Hann, twiddles, log2)": {
+        "flash": 10324,
+        "ram": 0
+      },
+      "startup + UART + libc": {
+        "flash": 372,
+        "ram": 0
+      },
+      "estimator state (hr_estimator_t)": {
+        "flash": 0,
+        "ram": 9324
+      }
+    },
+    "image_flash": 70180,
+    "image_ram_incl_stack": 30536,
+    "test_vector_flash": 53874,
+    "largest_ram": [
+      [
+        "est",
+        9324
+      ],
+      [
+        "fft_im",
+        8192
+      ],
+      [
+        "fft_re",
+        8192
+      ],
+      [
+        "sensor",
+        464
+      ]
+    ]
+  }
+}

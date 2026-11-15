@@ -56,12 +56,21 @@ def dominant_frequency(x: np.ndarray, fs: float, fmin: float = 0.5, fmax: float 
 # ---------------------------------------------------------------------------
 
 def bandpass_sos(fs: float, lo: float = 0.5, hi: float = 4.0, order: int = 4) -> np.ndarray:
-    """Butterworth bandpass as second-order sections (numerically safer than (b, a)).
+    """Butterworth bandpass as second-order sections, gain-balanced for fixed point.
 
-    The SOS coefficients are what the firmware will implement as a cascade of biquads.
+    scipy puts the whole (tiny) passband gain into section 0, so a fixed-point
+    implementation would shrink the signal in the first biquad and lose bits.
+    Here each section is rescaled to peak gain 1; the cascade's transfer function
+    is unchanged. The firmware uses exactly these coefficients (in Q30).
     """
-    from scipy.signal import butter
-    return butter(order, [lo, hi], btype="bandpass", fs=fs, output="sos")
+    from scipy.signal import butter, sosfreqz
+    sos = butter(order, [lo, hi], btype="bandpass", fs=fs, output="sos")
+    total = np.max(np.abs(sosfreqz(sos, worN=4096, fs=fs)[1]))
+    for i in range(len(sos)):
+        peak = np.max(np.abs(sosfreqz(sos[i:i + 1], worN=4096, fs=fs)[1]))
+        sos[i, :3] /= peak
+    sos[-1, :3] *= total / np.max(np.abs(sosfreqz(sos, worN=4096, fs=fs)[1]))
+    return sos
 
 
 def bandpass(x: np.ndarray, fs: float, lo: float = 0.5, hi: float = 4.0, order: int = 4,

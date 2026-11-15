@@ -12,14 +12,30 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
-from scipy.signal import resample_poly
 
-from .data import FS_ACC, FS_PPG, HR_SHIFT_S, HR_WINDOW_S, Subject
+from .data import FS_PPG, HR_SHIFT_S, HR_WINDOW_S, Subject
 from .dsp import acc_mask, bandpass, hmm_track_step, nlms, spectrum
 
 NFFT = 2048            # zero-padded FFT: 64 Hz / 2048 = 0.03125 Hz = ~1.9 BPM per bin
 F_LO, F_HI = 0.5, 4.0  # 30-240 BPM
 DEV_SUBJECTS = ("S1", "S2", "S3")
+
+# Sensor integer formats shared with the firmware (see firmware/include/hr_config.h).
+PPG_COUNTS_PER_UNIT = 16      # dataset PPG unit -> MAX30102-style 18-bit ADC counts
+ADC_MID = 1 << 17             # mid-scale of the 18-bit ADC (dataset PPG is zero-centred)
+ADC_MAX = (1 << 18) - 1
+ACC_COUNTS_PER_G = 64         # accelerometer LSB = 1/64 g (exact for PPG-DaLiA's E4 data)
+
+
+def ppg_counts(subj: Subject) -> np.ndarray:
+    """PPG as the 18-bit unsigned integers a MAX30102 would deliver."""
+    c = np.round(subj.ppg.astype(np.float64) * PPG_COUNTS_PER_UNIT) + ADC_MID
+    return np.clip(c, 0, ADC_MAX).astype(np.int32)
+
+
+def acc_counts(subj: Subject) -> np.ndarray:
+    """Accelerometer as int16 counts of 1/64 g, (N_acc, 3) at 32 Hz."""
+    return np.round(subj.acc.astype(np.float64) * ACC_COUNTS_PER_G).astype(np.int16)
 
 
 @dataclass(frozen=True)
@@ -46,15 +62,31 @@ FINAL_NO_LMS = Config("final without NLMS", bandpass=True, hmm=True, acc_mask=0.
 CONFIGS = [NAIVE, BANDPASS, LMS, HMM, FINAL, FINAL_NO_LMS]
 
 
+def upsample_acc(acc: np.ndarray) -> np.ndarray:
+    """32 -> 64 Hz, CAUSAL linear interpolation (what the firmware does sample by sample).
+
+    A new ACC sample a[k] arrives with PPG sample 2k. Output 2k is the midpoint of
+    a[k-1] and a[k], output 2k+1 repeats a[k]: linear interpolation delayed by one
+    64 Hz sample, so it never needs a future sample. (Stage 1 originally used
+    scipy's resample_poly, which is non-causal; switching changed test MAE 9.79 -> 9.73.)
+    """
+    a = np.asarray(acc, dtype=np.float64)
+    prev = np.vstack([a[:1], a[:-1]])
+    up = np.empty((2 * len(a), a.shape[1]))
+    up[0::2] = (prev + a) / 2
+    up[1::2] = a
+    return up
+
+
 def acc_at_ppg_rate(subj: Subject) -> np.ndarray:
-    """Bandpassed accelerometer, resampled 32 -> 64 Hz to line up with the PPG."""
-    acc = resample_poly(subj.acc.astype(np.float64), FS_PPG // FS_ACC, 1, axis=0)[: len(subj.ppg)]
+    """Bandpassed accelerometer in g, at 64 Hz, aligned with the PPG."""
+    acc = upsample_acc(acc_counts(subj) / ACC_COUNTS_PER_G)[: len(subj.ppg)]
     return bandpass(acc, FS_PPG, axis=0)
 
 
 def preprocess(subj: Subject, cfg: Config, acc: np.ndarray | None = None) -> np.ndarray:
     """Causal, streaming-equivalent preprocessing of the whole recording -> PPG at 64 Hz."""
-    ppg = subj.ppg.astype(np.float64)
+    ppg = (ppg_counts(subj) - ADC_MID) / PPG_COUNTS_PER_UNIT
     if cfg.bandpass:
         ppg = bandpass(ppg, FS_PPG)
     if cfg.lms:
