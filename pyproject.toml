@@ -1,0 +1,25 @@
+[project]
+name = "ppg-hr"
+version = "0.1.0"
+description = "Heart rate from wrist PPG: classical DSP vs neural network, emulated embedded C firmware, multi-level tests"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "matplotlib>=3.9",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["uv_build>=0.8,<0.9"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# The importable package lives in python/ppg_hr (not src/), so point the backend there.
+module-root = "python"
+module-name = "ppg_hr"
+
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
