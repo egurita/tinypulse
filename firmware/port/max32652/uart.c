@@ -10,6 +10,7 @@
 #define UART_CTRL_ENABLE   (1u << 0)
 #define UART_CTRL_8BIT     (3u << 8)
 #define UART_STAT_TX_FULL  (1u << 7)
+#define UART_STAT_RX_EMPTY (1u << 4)
 
 void uart_init(void) {
     UART_BAUD0 = 65;                       /* ~115200 baud from the peripheral clock */
@@ -19,6 +20,11 @@ void uart_init(void) {
 void uart_putc(char c) {
     while (UART_STAT & UART_STAT_TX_FULL) { }
     UART_FIFO = (uint8_t)c;
+}
+
+int uart_getc_nonblock(void) {
+    if (UART_STAT & UART_STAT_RX_EMPTY) return -1;
+    return (int)(UART_FIFO & 0xFF);
 }
 
 void uart_puts(const char *s) {

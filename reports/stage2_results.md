@@ -6,7 +6,7 @@ integer-only C99 (no FPU use, no malloc, no libc), sample-by-sample streaming.
 ## Fixed point vs float
 | | value |
 |---|---|
-| windows with identical HR (all 15 subjects) | **64649 / 64697 (99.93%)** |
+| windows with identical HR (all 15 subjects) | **64652 / 64697 (99.93%)** |
 | test MAE, float Python | 9.725 BPM |
 | test MAE, fixed-point C | 9.724 BPM |
 
@@ -19,11 +19,11 @@ Per activity (test S4-S15, float / fixed): sitting 2.4/2.4, stairs 27.1/27.1, ta
 |---|---|
 | HR outputs bit-exact vs host build | **True** (57 estimates, 0 samples lost) |
 | instructions per sample (bandpass x4 + NLMS) | mean 2474, max 2501 |
-| instructions per window (4 FFTs + mask + HMM) | mean 3.38 M, max 3.38 M |
+| instructions per window (4 FFTs + mask + HMM) | mean 3.39 M, max 3.40 M |
 | instructions per driver FIFO read (16 samples) | 2803 |
-| instructions per second of data | 1.86 M |
-| CPU load at 120 MHz, assuming 1 instr/cycle | **1.5%** |
-| worst-case window latency at 120 MHz, 1 instr/cycle | 28.2 ms |
+| instructions per second of data | 1.87 M |
+| CPU load at 120 MHz, assuming 1 instr/cycle | **1.6%** |
+| worst-case window latency at 120 MHz, 1 instr/cycle | 28.3 ms |
 
 Honesty note: Renode counts **instructions exactly** but does not model cycle timing
 (pipeline stalls, flash wait states, 64-bit multiply/divide latency). Real Cortex-M4
@@ -35,7 +35,7 @@ above. Time numbers are estimates; instruction counts are measured.
 |---|---|---|
 | bandpass | 0.2 KB | 0.0 KB |
 | nlms | 0.4 KB | 0.0 KB |
-| spectrum + FFT | 0.9 KB | 16.0 KB |
+| spectrum + FFT | 1.0 KB | 16.0 KB |
 | tracker (mask, HMM, log2) | 0.7 KB | 0.0 KB |
 | estimator glue | 0.6 KB | 0.0 KB |
 | MAX30102 driver | 0.8 KB | 0.0 KB |
@@ -44,7 +44,7 @@ above. Time numbers are estimates; instruction counts are measured.
 | estimator state (hr_estimator_t) | 0.0 KB | 9.1 KB |
 | **HR pipeline total** | **12.8 KB** | **25.1 KB** |
 
-Linked benchmark image: 68.5 KB flash (of which 52.6 KB is
+Linked benchmark image: 68.6 KB flash (of which 52.6 KB is
 the embedded test recording), 29.8 KB RAM including a 4 KB stack.
 The 16 KB FFT scratch buffer (2 x 2048 x int32) is the largest item; a real-input FFT
 would halve it.
@@ -52,8 +52,8 @@ would halve it.
 ## Laptop (Apple M4) latency
 | | per sample |
 |---|---|
-| native C (fixed point) | 554 ns |
-| Python float reference | 2556 ns |
+| native C (fixed point) | 586 ns |
+| Python float reference | 2553 ns |
 
 ## Finding: cold start
 Started fresh at the beginning of an activity (watch put on mid-session), the first 2

@@ -13,7 +13,7 @@ from ppg_hr.data import (FS_ACC, FS_ACT, FS_ECG, FS_PPG, HR_SHIFT_S, HR_WINDOW_S
                          available_subjects, load_subject)
 
 SUBJECTS = available_subjects()
-pytestmark = pytest.mark.skipif(not SUBJECTS, reason="PPG-DaLiA not prepared")
+pytestmark = [pytest.mark.dataset, pytest.mark.skipif(not SUBJECTS, reason="PPG-DaLiA not prepared")]
 
 
 @pytest.fixture(scope="module", params=SUBJECTS)

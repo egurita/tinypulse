@@ -23,3 +23,10 @@ module-name = "ppg_hr"
 
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]
+addopts = "--strict-markers"
+markers = [
+    "dataset: needs PPG-DaLiA in data/processed",
+    "firmware: builds and runs the C firmware on the host",
+    "sil: software-in-the-loop over a serial port",
+    "renode: needs the Renode emulator",
+]

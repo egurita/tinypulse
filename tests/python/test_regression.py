@@ -9,7 +9,8 @@ from ppg_hr.data import SUBJECTS, available_subjects, load_subject
 from ppg_hr.evaluate import mae_by_activity, mae_subject_mean, run
 from ppg_hr.pipeline import DEV_SUBJECTS, FINAL, FINAL_NO_LMS, NAIVE
 
-pytestmark = pytest.mark.skipif(len(available_subjects()) < 15, reason="PPG-DaLiA not prepared")
+pytestmark = [pytest.mark.dataset,
+              pytest.mark.skipif(len(available_subjects()) < 15, reason="PPG-DaLiA not prepared")]
 TEST = [s for s in SUBJECTS if s not in DEV_SUBJECTS]
 
 LIMITS_BPM = {  # measured -> limit
@@ -29,6 +30,14 @@ LIMITS_BPM = {  # measured -> limit
 def results():
     subjects = [load_subject(s) for s in TEST]
     return {cfg.name: run(subjects, cfg) for cfg in (NAIVE, FINAL, FINAL_NO_LMS)}
+
+
+@pytest.fixture(scope="module", autouse=True)
+def record(results, metrics):
+    metrics.record("regression_mae_by_activity", mae_by_activity(results[FINAL.name], TEST))
+    metrics.record("regression_naive_mae_by_activity", mae_by_activity(results[NAIVE.name], TEST))
+    metrics.record("regression_limits", LIMITS_BPM)
+    metrics.record("regression_test_mae", mae_subject_mean(results[FINAL.name], TEST))
 
 
 @pytest.mark.parametrize("activity", LIMITS_BPM)

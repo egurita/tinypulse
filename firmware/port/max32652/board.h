@@ -5,6 +5,7 @@
 
 void uart_init(void);
 void uart_putc(char c);
+int  uart_getc_nonblock(void);
 void uart_puts(const char *s);
 void uart_putu(uint32_t v);
 void uart_puti(int32_t v);

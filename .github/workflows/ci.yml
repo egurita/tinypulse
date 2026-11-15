@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      RENODE_VERSION: "1.17.0"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Python environment
+        run: uv sync
+
+      - name: ARM toolchain
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q gcc-arm-none-eabi
+          arm-none-eabi-gcc --version | head -1
+
+      - name: Cache Renode
+        id: renode-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/renode
+          key: renode-${{ env.RENODE_VERSION }}-linux-portable
+
+      - name: Install Renode
+        if: steps.renode-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/renode
+          curl -sSL --fail -o /tmp/renode.tar.gz \
+            "https://github.com/renode/renode/releases/download/v${RENODE_VERSION}/renode-${RENODE_VERSION}.linux-portable.tar.gz"
+          tar -xzf /tmp/renode.tar.gz -C ~/renode --strip-components=1
+
+      - name: Renode on PATH
+        run: |
+          echo "RENODE=$HOME/renode/renode" >> "$GITHUB_ENV"
+          ~/renode/renode --version | head -1
+
+      # PPG-DaLiA is ~2.8 GB from UCI; only the 427 MB of compact .npz files are cached.
+      - name: Cache PPG-DaLiA (processed)
+        id: data-cache
+        uses: actions/cache@v4
+        with:
+          path: data/processed
+          key: ppg-dalia-processed-${{ hashFiles('python/ppg_hr/data.py', 'python/scripts/prepare_data.py') }}
+
+      - name: Download and prepare PPG-DaLiA
+        if: steps.data-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p data/raw
+          curl -sSL --fail -o data/raw/ppg_dalia.zip https://archive.ics.uci.edu/static/public/495/ppg+dalia.zip
+          unzip -q data/raw/ppg_dalia.zip data.zip -d data/raw
+          rm data/raw/ppg_dalia.zip
+          uv run python python/scripts/prepare_data.py
+          rm data/raw/data.zip
+
+      - name: Build firmware (native + Cortex-M4)
+        run: make -C firmware native arm
+
+      - name: Run all tests (unit, data, synthetic, equivalence, regression, SIL native + emulated)
+        run: uv run pytest -v --junitxml=reports/ci/junit.xml
+
+      - name: Test report
+        if: always()
+        run: |
+          uv run python python/scripts/ci_report.py
+          cat reports/ci/summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: reports/ci/

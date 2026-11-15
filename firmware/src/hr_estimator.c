@@ -25,15 +25,15 @@ static int estimate_window(hr_estimator_t *st, hr_result_t *out) {
     uint64_t acc_mag[HR_NBINS];
     int32_t mean;
 
-    uint32_t mx = (uint32_t)spectrum_windowed_max(st->ppg_ring, oldest, &mean);
+    uint64_t mx = spectrum_windowed_max(st->ppg_ring, oldest, &mean);
     spectrum_band(st->ppg_ring, oldest, mean, spectrum_block_shift(mx), ppg_mag);
 
     /* ACC: one common block shift for all three axes, because their magnitudes are
      * summed (a per-axis scale would change the relative weights). */
     int32_t acc_mean[HR_NLMS_CH];
-    uint32_t acc_mx = 0;
+    uint64_t acc_mx = 0;
     for (int c = 0; c < HR_NLMS_CH; c++) {
-        uint32_t m = (uint32_t)spectrum_windowed_max(st->acc_ring[c], oldest, &acc_mean[c]);
+        uint64_t m = spectrum_windowed_max(st->acc_ring[c], oldest, &acc_mean[c]);
         if (m > acc_mx) acc_mx = m;
     }
     int acc_shift = spectrum_block_shift(acc_mx);

@@ -17,28 +17,32 @@
  * 2 x 2048 x 4 B = 16 KB: the largest RAM item in the firmware. */
 static int32_t fft_re[HR_NFFT], fft_im[HR_NFFT];
 
-static inline int32_t windowed(const int32_t *ring, uint32_t oldest, int32_t mean, int i) {
+/* Windowed sample with the Hann window's 15 fractional bits KEPT (int64). Dropping
+ * them here (>> 15) before the block scaling below lost precision on quiet signals;
+ * caught by test_spectrum_matches_float_at_any_amplitude[0.01]. */
+static inline int64_t windowed(const int32_t *ring, uint32_t oldest, int32_t mean, int i) {
     int32_t x = ring[(oldest + (uint32_t)i) % HR_WIN] - mean;
-    return (int32_t)rshr64((int64_t)x * hr_hann_q15[i], 15);
+    return (int64_t)x * hr_hann_q15[i];
 }
 
-int32_t spectrum_windowed_max(const int32_t *ring, uint32_t oldest, int32_t *mean_out) {
+uint64_t spectrum_windowed_max(const int32_t *ring, uint32_t oldest, int32_t *mean_out) {
     int64_t sum = 0;
     for (int i = 0; i < HR_WIN; i++) sum += ring[i];
     int32_t mean = (int32_t)(sum >= 0 ? (sum + HR_WIN / 2) / HR_WIN : (sum - HR_WIN / 2) / HR_WIN);
-    uint32_t mx = 0;
+    uint64_t mx = 0;
     for (int i = 0; i < HR_WIN; i++) {
-        uint32_t a = abs32(windowed(ring, oldest, mean, i));
+        int64_t w = windowed(ring, oldest, mean, i);
+        uint64_t a = (uint64_t)(w < 0 ? -w : w);
         if (a > mx) mx = a;
     }
     *mean_out = mean;
-    return (int32_t)mx;
+    return mx;
 }
 
 /* Left shift (negative = right shift) that brings max_abs into [2^27, 2^28). */
-int spectrum_block_shift(uint32_t max_abs) {
+int spectrum_block_shift(uint64_t max_abs) {
     if (max_abs == 0) return 0;
-    int msb = 31 - __builtin_clz(max_abs);
+    int msb = 63 - __builtin_clzll(max_abs);
     return 27 - msb;
 }
 

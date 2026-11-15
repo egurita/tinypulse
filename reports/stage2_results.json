@@ -19,16 +19,16 @@
         "mae_fixed": 10.020884213955933
       },
       "S3": {
-        "identical_pct": 99.88550492328831,
+        "identical_pct": 99.90840393863064,
         "max_diff_bpm": 11.25,
         "mae_float": 5.150530794814983,
-        "mae_fixed": 5.148466453962804
+        "mae_fixed": 5.148094023505146
       },
       "S4": {
-        "identical_pct": 99.91251093613297,
+        "identical_pct": 99.89063867016623,
         "max_diff_bpm": 11.25,
         "mae_float": 13.348082205337699,
-        "mae_fixed": 13.346990647904203
+        "mae_fixed": 13.346580542917327
       },
       "S5": {
         "identical_pct": 99.978489997849,
@@ -79,10 +79,10 @@
         "mae_fixed": 8.39105008211652
       },
       "S13": {
-        "identical_pct": 99.95618838992333,
+        "identical_pct": 99.97809419496167,
         "max_diff_bpm": 1.875,
         "mae_float": 6.603547439491631,
-        "mae_fixed": 6.603327171434317
+        "mae_fixed": 6.603737905278786
       },
       "S14": {
         "identical_pct": 99.93297587131367,
@@ -91,16 +91,16 @@
         "mae_fixed": 7.459194594136938
       },
       "S15": {
-        "identical_pct": 99.92435703479576,
+        "identical_pct": 99.97478567826525,
         "max_diff_bpm": 1.875,
         "mae_float": 9.006508777674195,
         "mae_fixed": 9.006458784556425
       }
     },
-    "identical_windows": 64649,
+    "identical_windows": 64652,
     "total_windows": 64697,
     "test_mae_float": 9.72492084767972,
-    "test_mae_fixed": 9.723915370503047,
+    "test_mae_fixed": 9.723915422907845,
     "per_activity_test": {
       "sitting": [
         2.3902401525343184,
@@ -124,7 +124,7 @@
       ],
       "lunch": [
         4.993836747922668,
-        4.993450983224776
+        4.993275470728286
       ],
       "walking": [
         20.164775464273525,
@@ -135,8 +135,8 @@
         3.7458626625504565
       ]
     },
-    "ns_per_sample_c": 553.7709316713655,
-    "ns_per_sample_python": 2556.3441369792395
+    "ns_per_sample_c": 585.6990024016017,
+    "ns_per_sample_python": 2552.778408275611
   },
   "cold_start": {
     "segments": 93,
@@ -152,17 +152,17 @@
     },
     "bit_exact_vs_host": true,
     "estimates": 57,
-    "wall_s": 113.78928349993657,
+    "wall_s": 116.40249329106882,
     "instr_per_sample_mean": 2474.3708513708516,
     "instr_per_sample_max": 2501,
-    "instr_per_window_mean": 3379165.3684210526,
-    "instr_per_window_max": 3382029,
+    "instr_per_window_mean": 3393526.0701754387,
+    "instr_per_window_max": 3396382,
     "instr_per_fifo_read_mean": 2803.0,
-    "instr_total_benchmark": 213424853,
+    "instr_total_benchmark": 214243413,
     "seconds_of_data": 120.0,
-    "instr_per_second_of_data": 1859154.4186982608,
-    "cpu_load_pct_at_120MHz_cpi1": 1.5492953489152175,
-    "window_latency_ms_at_120MHz_cpi1": 28.183574999999998
+    "instr_per_second_of_data": 1866334.7695754538,
+    "cpu_load_pct_at_120MHz_cpi1": 1.5552789746462115,
+    "window_latency_ms_at_120MHz_cpi1": 28.303183333333333
   },
   "memory": {
     "modules": {
@@ -175,7 +175,7 @@
         "ram": 0
       },
       "spectrum + FFT": {
-        "flash": 960,
+        "flash": 976,
         "ram": 16384
       },
       "tracker (mask, HMM, log2)": {
@@ -183,7 +183,7 @@
         "ram": 0
       },
       "estimator glue": {
-        "flash": 592,
+        "flash": 608,
         "ram": 0
       },
       "MAX30102 driver": {
@@ -195,7 +195,7 @@
         "ram": 0
       },
       "startup + UART + libc": {
-        "flash": 372,
+        "flash": 396,
         "ram": 0
       },
       "estimator state (hr_estimator_t)": {
@@ -203,7 +203,7 @@
         "ram": 9324
       }
     },
-    "image_flash": 70180,
+    "image_flash": 70212,
     "image_ram_incl_stack": 30536,
     "test_vector_flash": 53874,
     "largest_ram": [

@@ -37,7 +37,7 @@ void hr_nlms_run(const int32_t *d, const int32_t *u, size_t n, int32_t *e) {
 /* Spectrum of one chronological window x[HR_WIN] with its own block shift. */
 void hr_spectrum_run(const int32_t *x, uint32_t *mag) {
     int32_t mean;
-    uint32_t mx = (uint32_t)spectrum_windowed_max(x, 0, &mean);
+    uint64_t mx = spectrum_windowed_max(x, 0, &mean);
     spectrum_band(x, 0, mean, spectrum_block_shift(mx), mag);
 }
 
