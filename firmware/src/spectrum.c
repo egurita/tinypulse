@@ -75,14 +75,14 @@ void fft_q31(int32_t *re, int32_t *im) {
 }
 
 void spectrum_band(const int32_t *ring, uint32_t oldest, int32_t mean, int shift,
-                   uint32_t mag[HR_NBINS]) {
+                   uint32_t *mag, int nbins) {
     for (int i = 0; i < HR_NFFT; i++) { fft_re[i] = 0; fft_im[i] = 0; }
     for (int i = 0; i < HR_WIN; i++) {
         int64_t x = windowed(ring, oldest, mean, i);
         fft_re[i] = (int32_t)(shift >= 0 ? x * ((int64_t)1 << shift) : rshr64(x, (unsigned)-shift));
     }
     fft_q31(fft_re, fft_im);
-    for (int k = 0; k < HR_NBINS; k++) {
+    for (int k = 0; k < nbins; k++) {
         int64_t r = fft_re[HR_BIN_LO + k], m = fft_im[HR_BIN_LO + k];
         mag[k] = isqrt64((uint64_t)(r * r) + (uint64_t)(m * m));
     }

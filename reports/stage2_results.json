@@ -135,8 +135,8 @@
         3.7458626625504565
       ]
     },
-    "ns_per_sample_c": 585.6990024016017,
-    "ns_per_sample_python": 2552.778408275611
+    "ns_per_sample_c": 980.6967545733257,
+    "ns_per_sample_python": 2527.466643918047
   },
   "cold_start": {
     "segments": 93,
@@ -145,24 +145,26 @@
   },
   "emulator": {
     "uart_done": {
+      "mode": "dsp",
       "samples": "7680",
       "estimates": "57",
       "mismatches_vs_host": "0",
-      "samples_lost": "0"
+      "samples_lost": "0",
+      "stack_used": "1144"
     },
     "bit_exact_vs_host": true,
     "estimates": 57,
-    "wall_s": 116.40249329106882,
-    "instr_per_sample_mean": 2474.3708513708516,
-    "instr_per_sample_max": 2501,
-    "instr_per_window_mean": 3393526.0701754387,
-    "instr_per_window_max": 3396382,
+    "wall_s": 157.94014591700397,
+    "instr_per_sample_mean": 2475.3708513708516,
+    "instr_per_sample_max": 2502,
+    "instr_per_window_mean": 3581082.50877193,
+    "instr_per_window_max": 3589655,
     "instr_per_fifo_read_mean": 2803.0,
-    "instr_total_benchmark": 214243413,
+    "instr_total_benchmark": 224925919,
     "seconds_of_data": 120.0,
-    "instr_per_second_of_data": 1866334.7695754538,
-    "cpu_load_pct_at_120MHz_cpi1": 1.5552789746462115,
-    "window_latency_ms_at_120MHz_cpi1": 28.303183333333333
+    "instr_per_second_of_data": 1960176.9888736994,
+    "cpu_load_pct_at_120MHz_cpi1": 1.6334808240614163,
+    "window_latency_ms_at_120MHz_cpi1": 29.91379166666667
   },
   "memory": {
     "modules": {
@@ -175,16 +177,16 @@
         "ram": 0
       },
       "spectrum + FFT": {
-        "flash": 976,
+        "flash": 1008,
         "ram": 16384
       },
       "tracker (mask, HMM, log2)": {
-        "flash": 680,
+        "flash": 672,
         "ram": 0
       },
       "estimator glue": {
-        "flash": 608,
-        "ram": 0
+        "flash": 708,
+        "ram": 5212
       },
       "MAX30102 driver": {
         "flash": 844,
@@ -195,21 +197,21 @@
         "ram": 0
       },
       "startup + UART + libc": {
-        "flash": 396,
+        "flash": 476,
         "ram": 0
       },
       "estimator state (hr_estimator_t)": {
         "flash": 0,
-        "ram": 9324
+        "ram": 9328
       }
     },
-    "image_flash": 70212,
-    "image_ram_incl_stack": 30536,
-    "test_vector_flash": 53874,
+    "image_flash": 75212,
+    "image_ram_incl_stack": 39368,
+    "test_vector_flash": 53988,
     "largest_ram": [
       [
         "est",
-        9324
+        9328
       ],
       [
         "fft_im",

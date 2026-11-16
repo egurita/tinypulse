@@ -43,6 +43,10 @@ int hmm_step(hmm_t *h, const uint32_t mag[HR_NBINS]) {
         logp[k] = lp < HR_HMM_LOG_FLOOR_Q16 ? HR_HMM_LOG_FLOOR_Q16 : lp;
     }
 
+    return hmm_step_logp(h, logp);
+}
+
+int hmm_step_logp(hmm_t *h, const int32_t logp[HR_NBINS]) {
     int32_t best_score = INT32_MIN;
     int best = 0;
     if (!h->started) {

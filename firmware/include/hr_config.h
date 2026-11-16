@@ -26,6 +26,9 @@
 #define HR_BIN_LO           16
 #define HR_BIN_HI           128
 #define HR_NBINS            (HR_BIN_HI - HR_BIN_LO + 1)
+/* Spectrum computed up to 8 Hz (bin 256) so the NN also sees each HR bin's 2nd harmonic. */
+#define HR_SPEC_HI          256
+#define HR_NSPEC            (HR_SPEC_HI - HR_BIN_LO + 1)
 #define HR_BPM_X1000_PER_BIN 1875
 
 /* NLMS motion canceller: 16 taps x 3 axes, mu = 0.02, eps = 0.1 g^2 */

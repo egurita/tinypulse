@@ -1,0 +1,107 @@
+{
+  "S1": {
+    "val_subject": "S2",
+    "val_mae": 4.42259261537744,
+    "best_epoch": 11,
+    "test_mae_argmax": 4.880222009778566,
+    "train_seconds": 32.367539416998625
+  },
+  "S2": {
+    "val_subject": "S3",
+    "val_mae": 2.8787610696277657,
+    "best_epoch": 8,
+    "test_mae_argmax": 4.5853265304919075,
+    "train_seconds": 30.065661415923387
+  },
+  "S3": {
+    "val_subject": "S4",
+    "val_mae": 5.731058854130622,
+    "best_epoch": 6,
+    "test_mae_argmax": 3.746457436441256,
+    "train_seconds": 29.85609245800879
+  },
+  "S4": {
+    "val_subject": "S5",
+    "val_mae": 9.266448761268594,
+    "best_epoch": 8,
+    "test_mae_argmax": 10.938308409609924,
+    "train_seconds": 29.67275470797904
+  },
+  "S5": {
+    "val_subject": "S6",
+    "val_mae": 4.539070013004073,
+    "best_epoch": 8,
+    "test_mae_argmax": 11.463193450750497,
+    "train_seconds": 30.145244000013918
+  },
+  "S6": {
+    "val_subject": "S7",
+    "val_mae": 2.9172149713772835,
+    "best_epoch": 20,
+    "test_mae_argmax": 6.313944056414176,
+    "train_seconds": 30.48772995802574
+  },
+  "S7": {
+    "val_subject": "S8",
+    "val_mae": 9.334118310844717,
+    "best_epoch": 3,
+    "test_mae_argmax": 3.556594363215037,
+    "train_seconds": 29.644914750009775
+  },
+  "S8": {
+    "val_subject": "S9",
+    "val_mae": 9.426391341124903,
+    "best_epoch": 5,
+    "test_mae_argmax": 14.226627293157495,
+    "train_seconds": 29.557855666964315
+  },
+  "S9": {
+    "val_subject": "S10",
+    "val_mae": 3.7920786013976904,
+    "best_epoch": 20,
+    "test_mae_argmax": 9.877382711464483,
+    "train_seconds": 29.701735083013773
+  },
+  "S10": {
+    "val_subject": "S11",
+    "val_mae": 5.1082027496898155,
+    "best_epoch": 4,
+    "test_mae_argmax": 6.418192825647163,
+    "train_seconds": 34.02626691595651
+  },
+  "S11": {
+    "val_subject": "S12",
+    "val_mae": 5.303167267887654,
+    "best_epoch": 8,
+    "test_mae_argmax": 10.694386126799436,
+    "train_seconds": 29.378273000009358
+  },
+  "S12": {
+    "val_subject": "S13",
+    "val_mae": 2.408723825745097,
+    "best_epoch": 15,
+    "test_mae_argmax": 7.36175229830397,
+    "train_seconds": 29.61251316696871
+  },
+  "S13": {
+    "val_subject": "S14",
+    "val_mae": 3.6867205676913155,
+    "best_epoch": 20,
+    "test_mae_argmax": 2.6039838258172963,
+    "train_seconds": 29.351016749977134
+  },
+  "S14": {
+    "val_subject": "S15",
+    "val_mae": 4.10250588444466,
+    "best_epoch": 17,
+    "test_mae_argmax": 3.5060380248750715,
+    "train_seconds": 29.523960208054632
+  },
+  "S15": {
+    "val_subject": "S1",
+    "val_mae": 5.21857390071215,
+    "best_epoch": 9,
+    "test_mae_argmax": 4.459351765165652,
+    "train_seconds": 29.400092708994634
+  }
+}

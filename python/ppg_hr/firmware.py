@@ -43,18 +43,42 @@ def lib() -> C.CDLL:
         L.hr_spectrum_run.argtypes = [P(np.int32), P(np.uint32)]
         L.hr_log2_q16.restype = C.c_int32
         L.hr_log2_q16.argtypes = [C.c_uint64]
+        L.hr_run_mode.restype = C.c_size_t
+        L.hr_run_mode.argtypes = [C.c_int, P(np.uint32), C.c_size_t, P(np.int16), C.c_size_t,
+                                  P(np.uint16), C.c_size_t, C.c_void_p]
+        L.hr_nn_forward.argtypes = [P(np.int8), P(np.int32)]
         _lib = L
     return _lib
 
 
-def run_subject(subj: Subject) -> np.ndarray:
+MODE_DSP, MODE_NN = 0, 1
+NSPEC = 241
+
+
+def run_counts(ppg: np.ndarray, acc: np.ndarray, n_max: int, mode: int = MODE_DSP,
+               with_spectra: bool = False):
+    """Run the firmware on raw sensor counts. Returns HR bins (and per-window spectra)."""
+    ppg = np.ascontiguousarray(ppg, dtype=np.uint32)
+    acc = np.ascontiguousarray(acc, dtype=np.int16)
+    out = np.zeros(n_max, dtype=np.uint16)
+    spec = np.zeros((n_max, 2, NSPEC), dtype=np.uint64) if with_spectra else None
+    ptr = spec.ctypes.data if with_spectra else None
+    n = lib().hr_run_mode(mode, ppg, len(ppg), acc, len(acc), out, n_max, ptr)
+    return (out[:n], spec[:n]) if with_spectra else out[:n]
+
+
+def run_subject(subj: Subject, mode: int = MODE_DSP) -> np.ndarray:
     """Firmware HR estimates (BPM) for every reference window of a subject."""
-    ppg = np.ascontiguousarray(ppg_counts(subj).astype(np.uint32))
-    acc = np.ascontiguousarray(acc_counts(subj))
-    out = np.zeros(len(subj.hr_ref) + 8, dtype=np.uint16)
-    n = lib().hr_run(ppg, len(ppg), acc, len(acc), out, len(out))
-    assert n >= len(subj.hr_ref), (n, len(subj.hr_ref))
-    return (BIN_LO + out[: len(subj.hr_ref)].astype(float)) * BPM_PER_BIN
+    bins = run_counts(ppg_counts(subj), acc_counts(subj), len(subj.hr_ref) + 8, mode)
+    assert len(bins) >= len(subj.hr_ref), (len(bins), len(subj.hr_ref))
+    return (BIN_LO + bins[: len(subj.hr_ref)].astype(float)) * BPM_PER_BIN
+
+
+def nn_forward_q(xq: np.ndarray) -> np.ndarray:
+    """C INT8 network on one input (4, 113) int8 -> int32 logits (113,)."""
+    out = np.empty(113, dtype=np.int32)
+    lib().hr_nn_forward(np.ascontiguousarray(xq, dtype=np.int8), out)
+    return out
 
 
 def bandpass_q(x: np.ndarray) -> np.ndarray:

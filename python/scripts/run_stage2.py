@@ -108,18 +108,12 @@ def emulated():
     t = time.perf_counter()
     run = emulator.run(virtual_seconds=3)
     wall = time.perf_counter() - t
-    hr = [tuple(map(int, l.split()[1:])) for l in run.uart.splitlines() if l.startswith("HR ")]
-    done = dict(kv.split("=") for kv in run.uart.strip().splitlines()[-1].split()[1:])
-    bins = [b for _, b, _ in hr]
+    bins, done = emulator.uart_results(run.uart, "HR")
     marks = run.marks
-    push, window, fifo = [], [], []
-    for (i1, c1), (i2, c2) in zip(marks, marks[1:]):
-        if i1 == 1 and i2 == 2: push.append(c2 - c1)
-        if i1 == 1 and i2 == 3: window.append(c2 - c1)
-        if i1 == 4 and i2 == 5: fifo.append(c2 - c1)
-    total = marks[-1][1]
+    st = emulator.mark_stats(marks, 0)
+    push, window, fifo = st["push"], st["window"], st["fifo"]
+    total = next(c for i, c in marks if i == 11) - marks[0][1]   # DSP pass only
     seconds_of_data = meta["n_samples"] / 64
-    push, window, fifo = map(np.array, (push, window, fifo))
     per_second = 64 * push.mean() + 0.5 * window.mean() + 4 * fifo.mean()
     return {
         "uart_done": done, "bit_exact_vs_host": bins == meta["expected_bins"],

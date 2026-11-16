@@ -31,10 +31,9 @@ static const max30102_config_t SENSOR_CFG = {
     .led_red_pa = 0x24, .led_ir_pa = 0x24, .fifo_a_full = 15,
 };
 
-int main(void) {
-    uart_init();
-    uart_puts("BOOT hr-firmware max32652\n");
-
+/* One pass over the test vector. DSP results are printed as "HR ...", NN results as
+ * "HN ..."; NN markers are offset by 10 so the two can be told apart in the log. */
+static void run(hr_mode_t mode, const uint16_t *expected, uint32_t mark_base) {
     mock_max30102_init(&sensor);
     hal_i2c_t hal = mock_max30102_hal(&sensor);
     int st = max30102_init(&dev, &hal, &SENSOR_CFG);
@@ -42,36 +41,48 @@ int main(void) {
     uart_puti(st);
     uart_putc('\n');
     hr_init(&est);
+    hr_set_mode(&est, mode);
 
     uint32_t fed = 0, mismatches = 0, n_out = 0;
     for (uint32_t i = 0; i < TV_N_PPG; i++) {
         mock_max30102_push(&sensor, tv_ppg[i], tv_ppg[i]);   /* IR channel carries the PPG */
         if ((i + 1) % FIFO_READ_EVERY != 0 && i + 1 != TV_N_PPG) continue;
 
-        bench_mark(MARK_FIFO_START);
+        bench_mark(mark_base + MARK_FIFO_START);
         int n = max30102_read_fifo(&dev, fifo_buf, MAX30102_FIFO_DEPTH);
-        bench_mark(MARK_FIFO_END);
+        bench_mark(mark_base + MARK_FIFO_END);
         for (int j = 0; j < n; j++, fed++) {
             const int16_t *acc = (fed % 2 == 0) ? &tv_acc[3 * (fed / 2)] : 0;
             hr_result_t r;
-            bench_mark(MARK_PUSH_START);
+            bench_mark(mark_base + MARK_PUSH_START);
             int ready = hr_push(&est, fifo_buf[j].ir, acc, &r);
-            bench_mark(ready ? MARK_WINDOW_END : MARK_PUSH_END);
+            bench_mark(mark_base + (ready ? MARK_WINDOW_END : MARK_PUSH_END));
             if (ready) {
-                uart_puts("HR ");
+                uart_puts(mode == HR_MODE_NN ? "HN " : "HR ");
                 uart_putu(r.window_index); uart_putc(' ');
                 uart_putu(r.bin); uart_putc(' ');
                 uart_putu(r.bpm_x1000); uart_putc('\n');
-                if (n_out >= TV_N_EXPECTED || r.bin != tv_expected_bins[n_out]) mismatches++;
+                if (n_out >= TV_N_EXPECTED || r.bin != expected[n_out]) mismatches++;
                 n_out++;
             }
         }
     }
-    uart_puts("DONE samples="); uart_putu(fed);
+    uart_puts(mode == HR_MODE_NN ? "DONE mode=nn" : "DONE mode=dsp");
+    uart_puts(" samples="); uart_putu(fed);
     uart_puts(" estimates="); uart_putu(n_out);
     uart_puts(" mismatches_vs_host="); uart_putu(mismatches);
     uart_puts(" samples_lost="); uart_putu(dev.samples_lost);
+    uart_puts(" stack_used="); uart_putu(stack_high_water());
     uart_putc('\n');
+}
+
+int main(void) {
+    uart_init();
+    uart_puts("BOOT hr-firmware max32652\n");
+    run(HR_MODE_DSP, tv_expected_bins, 0);
+    run(HR_MODE_NN, tv_expected_bins_nn, 10);
     bench_mark(MARK_DONE);
-    for (;;) { }
+    /* Sleep instead of spinning: on hardware this is the low-power idle, and in the
+     * emulator the rest of the simulated time then costs nothing to emulate. */
+    for (;;) __asm volatile("wfi");
 }

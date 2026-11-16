@@ -29,9 +29,10 @@ def main():
     acc = acc_counts(s)[start // 2:(start + n) // 2]
 
     # Expected output: the host build of the same firmware code on the same segment.
-    bins = np.zeros(64, dtype=np.uint16)
-    k = fw.lib().hr_run(np.ascontiguousarray(ppg), n, np.ascontiguousarray(acc), len(acc), bins, len(bins))
-    bins = bins[:k]
+    bins = fw.run_counts(ppg, acc, 64, fw.MODE_DSP)
+    bins_nn = fw.run_counts(ppg, acc, 64, fw.MODE_NN)
+    k = len(bins)
+    assert len(bins_nn) == k
 
     def arr(ctype, name, v, per=12):
         v = [str(int(x)) for x in np.ravel(v)]
@@ -46,16 +47,17 @@ def main():
 #define TV_N_EXPECTED {k}
 extern const uint32_t tv_ppg[TV_N_PPG];
 extern const int16_t  tv_acc[TV_N_PPG / 2 * 3];
-extern const uint16_t tv_expected_bins[TV_N_EXPECTED];
+extern const uint16_t tv_expected_bins[TV_N_EXPECTED];      /* DSP mode */
+extern const uint16_t tv_expected_bins_nn[TV_N_EXPECTED];   /* INT8 NN mode */
 #endif
 """)
     (OUT / "test_vector.c").write_text(
         f"/* GENERATED: {SID}, samples {start}..{start + n} ({SECONDS} s, rest -> stairs). */\n"
         '#include "test_vector.h"\n\n'
         + arr("uint32_t", "tv_ppg", ppg) + arr("int16_t", "tv_acc", acc)
-        + arr("uint16_t", "tv_expected_bins", bins))
+        + arr("uint16_t", "tv_expected_bins", bins) + arr("uint16_t", "tv_expected_bins_nn", bins_nn))
     meta = {"subject": SID, "start_sample": start, "first_ref_window": start // hop,
-            "n_samples": n, "expected_bins": bins.tolist()}
+            "n_samples": n, "expected_bins": bins.tolist(), "expected_bins_nn": bins_nn.tolist()}
     (OUT / "test_vector.json").write_text(json.dumps(meta))
     print(f"wrote test vector: {SID} samples {start}..{start + n}, {k} expected estimates")
 

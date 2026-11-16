@@ -4,7 +4,8 @@ Wrist-PPG heart-rate estimation on PPG-DaLiA, compared across a classical DSP pi
 and a neural network, ported to fixed-point embedded C (emulated Cortex-M), tested at
 the unit / regression / equivalence / software-in-the-loop levels, plus a live webcam demo.
 
-> Work in progress: Stages 1–3 done (classical DSP, fixed-point firmware, multi-level tests + CI).
+> Work in progress: Stages 1–4 done (classical DSP, fixed-point firmware, multi-level tests + CI,
+> neural network with INT8 deployment).
 
 ## Stage 1 results: classical DSP (Python)
 
@@ -37,9 +38,9 @@ I2C HAL, tested against a register-level mock fed with PPG-DaLiA data; run in Re
 |---|---|
 | fixed-point vs float: identical HR windows | **99.93%** (64,652 / 64,697), test MAE 9.72 vs 9.72 BPM |
 | emulated MCU output vs host build | bit-exact (57/57 estimates) |
-| instructions per sample / per 2 s window | 2,474 / 3.39 M |
+| instructions per sample / per 2 s window | 2,475 / 3.58 M |
 | CPU load @120 MHz (1 instr/cycle, measured instr. counts) | ~1.6% |
-| flash / static RAM (pipeline + driver) | 12.8 KB / 25.1 KB |
+| flash / static RAM (DSP pipeline + driver) | 13.0 KB / 30.2 KB (+4 KB stack, 1.1 KB used) |
 | native C on laptop (Apple M4) | ~550 ns per sample |
 
 Details and caveats (emulator timing is not real-hardware timing): [`reports/stage2_results.md`](reports/stage2_results.md).
@@ -60,7 +61,7 @@ Details and caveats (emulator timing is not real-hardware timing): [`reports/sta
                            Cortex-M4 build must be warning-free
 ```
 
-132 pytest tests (+89 C checks) in ~2 min. GitHub Actions runs all of them, including SIL on the
+140 pytest tests (+89 C checks) in ~2.5 min. GitHub Actions runs all of them, including SIL on the
 emulated MCU, and publishes a report (tables + plots) as the job summary and an artifact:
 `.github/workflows/ci.yml`, `python/scripts/ci_report.py`.
 
@@ -78,11 +79,37 @@ uv run pytest -m "not dataset"     # without PPG-DaLiA (synthetic + equivalence 
 ![per activity](reports/figures/stage1_per_activity.png)
 ![trace](reports/figures/stage1_trace_S5.png)
 
+## Stage 4 results: neural network vs DSP, INT8 on the MCU
+
+Leave-one-subject-out (15 folds; per fold: 13 train, 1 validation for epoch selection, 1 test).
+Both networks output 113 logits on the DSP's HR grid and are decoded by the same HMM tracker.
+
+| method | params | MACs / 2 s | MAE, all 15 (LOSO) | S4–S15 |
+|---|---|---|---|---|
+| DSP (Stages 1–2) | – | – | 9.29 | 9.72 |
+| Time-domain CNN + tracker (PPG + ACC, 8 s @ 32 Hz) | 33,169 | 1.50 M | 5.89 | 6.25 |
+| **Spectral CNN + tracker** (hybrid: DSP front-end spectra) | **3,106** | **0.33 M** | **5.71** | **5.99** |
+| Spectral CNN, **INT8** in C (firmware arithmetic) | | | **5.73** | 6.02 |
+
+- Hardest activities, DSP → INT8 network: stairs 27.9 → 13.9, table soccer 23.3 → 12.0, walking 16.4 → 7.6 BPM.
+- Cold start (tracker started mid-activity, first 2 min): 17.3 → 8.8 BPM.
+- INT8 (own post-training quantization: per-channel int8 weights, calibrated int8 activations,
+  int32 accumulators, integer requantization) costs +0.02 BPM; the C inference is **bit-exact**
+  with the NumPy integer reference.
+- On the emulated MAX32652 (model = the fold that never saw S5): bit-exact vs host, 7.1 M
+  instructions per 2 s window (vs 3.6 M DSP), ~3.1% CPU at 120 MHz; network = 3.6 KB weights
+  + 0.8 KB code, 3.5 KB activation RAM; measured stack high-water 1,144 / 4,096 B.
+
+Details: [`reports/stage4_results.md`](reports/stage4_results.md).
+
+![stage 4](reports/figures/stage4_per_activity.png)
+
 ## Layout
 ```
 python/ppg_hr/     library code (data loading, DSP, models)
-python/scripts/    runnable scripts (data prep, plots, evaluation)
-firmware/          C firmware (Stage 2)
+python/scripts/    runnable scripts (data prep, plots, evaluation, training, code generation)
+firmware/          C firmware: DSP + INT8 NN, MAX30102 driver, SIL app (Stages 2-4)
+models/stage4/     trained LOSO folds (PyTorch) + deployed INT8 model
 tests/python/      pytest suites
 reports/figures/   generated plots
 data/              dataset (git-ignored)
@@ -96,4 +123,7 @@ uv run python python/scripts/prepare_data.py
 uv run pytest
 uv run python python/scripts/plot_raw.py S1
 uv run python python/scripts/run_stage1.py   # all variants, all subjects -> reports/
+uv run python python/scripts/train_stage4.py spec   # LOSO training (also: time)
+uv run python python/scripts/gen_nn_model.py S5     # INT8 export of the deployed fold
+uv run python python/scripts/run_stage4.py          # DSP vs NN report
 ```

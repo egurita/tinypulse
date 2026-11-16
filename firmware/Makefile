@@ -7,7 +7,7 @@
 
 BUILD   := build
 CORE    := src/bandpass.c src/nlms.c src/spectrum.c src/track.c src/hr_estimator.c \
-           src/max30102.c gen/hr_tables.c
+           src/max30102.c src/nn.c gen/hr_tables.c gen/nn_model.c
 INC     := -Iinclude -Igen -Imock
 WARN    := -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wno-sign-conversion -std=c99
 

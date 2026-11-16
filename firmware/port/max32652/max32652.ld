@@ -40,6 +40,7 @@ SECTIONS
     /* Reserve the stack explicitly so --print-memory-usage counts it. */
     .stack (NOLOAD) : {
         . = ALIGN(8);
+        _sstack = .;
         . += STACK_SIZE;
         _estack = .;
     } > RAM

@@ -25,6 +25,7 @@ LAYERS = {   # test file -> layer of the test pyramid, bottom to top
     "test_equivalence": "4 equivalence: C fixed point vs Python float",
     "test_regression": "5 regression: per-activity error limits",
     "test_sil": "6 software-in-the-loop: serial, 64 Hz, native + emulated MCU",
+    "test_nn": "7 neural network: LOSO regression, INT8 C = NumPy, quantization loss",
 }
 INK, MUTED, BLUE, RED, GREY = "#1f2328", "#8c959f", "#2a78d6", "#d1242f", "#c9ced6"
 plt.rcParams.update({"axes.spines.top": False, "axes.spines.right": False, "axes.edgecolor": MUTED,
@@ -100,6 +101,13 @@ def main():
         if f"sil_{k}_latency_ms" in m:
             v = np.array(m[f"sil_{k}_latency_ms"])
             key.append(f"| SIL {k}: HR latency (median / max) | {np.median(v):.1f} / {v.max():.1f} ms |")
+    if "nn_loso_mae" in m:
+        key.append(f"| NN (spectral CNN + tracker), LOSO all 15 | {m['nn_loso_mae']:.2f} BPM (DSP {m['dsp_mae_all15']:.2f}) |")
+    if "int8_vs_float_mae_gap_S5" in m:
+        key.append(f"| INT8 vs float (S5) | +{m['int8_vs_float_mae_gap_S5']:.2f} BPM, "
+                   f"{m['int8_vs_float_identical_S5'] * 100:.0f}% identical windows |")
+    if "mcu_stack_used_bytes_nn" in m:
+        key.append(f"| emulated MCU stack high-water | {m['mcu_stack_used_bytes_nn']} / 4096 B |")
     if "c_unit_checks" in m:
         key.append(f"| C unit checks | {m['c_unit_checks']} ({m['c_unit_failures']} failed) |")
 

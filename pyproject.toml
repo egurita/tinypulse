@@ -7,6 +7,7 @@ dependencies = [
     "numpy>=2.0",
     "scipy>=1.13",
     "matplotlib>=3.9",
+    "torch>=2.15.0",
 ]
 
 [dependency-groups]
@@ -15,6 +16,16 @@ dev = ["pytest>=8.0"]
 [build-system]
 requires = ["uv_build>=0.8,<0.9"]
 build-backend = "uv_build"
+
+# On Linux (CI) use the CPU-only PyTorch wheels: the default ones bundle CUDA (several GB)
+# and the tests only run inference.
+[tool.uv.sources]
+torch = { index = "pytorch-cpu", marker = "sys_platform == 'linux'" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [tool.uv.build-backend]
 # The importable package lives in python/ppg_hr (not src/), so point the backend there.

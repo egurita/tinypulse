@@ -16,7 +16,10 @@ typedef struct {
     uint32_t bpm_x1000;      /* HR in milli-BPM */
 } hr_result_t;
 
+typedef enum { HR_MODE_DSP = 0, HR_MODE_NN = 1 } hr_mode_t;
+
 typedef struct {
+    hr_mode_t  mode;         /* peak selection: DSP (ACC mask + spectrum) or INT8 NN */
     bandpass_t ppg_bp;
     bandpass_t acc_bp[HR_NLMS_CH];
     nlms_t     nlms;
@@ -29,7 +32,10 @@ typedef struct {
     int32_t    acc_ring[HR_NLMS_CH][HR_WIN];              /* bandpassed ACC, Q22 */
 } hr_estimator_t;
 
-void hr_init(hr_estimator_t *st);
+void hr_init(hr_estimator_t *st);              /* DSP mode */
+void hr_set_mode(hr_estimator_t *st, hr_mode_t mode);
+/* Spectra of the current window (bins HR_BIN_LO..HR_SPEC_HI); used by hr_push and by tests. */
+void hr_window_spectra(const hr_estimator_t *st, uint32_t ppg_mag[HR_NSPEC], uint64_t acc_mag[HR_NSPEC]);
 
 /* ppg_counts: 18-bit ADC value. acc: 3 axes in 1/64 g counts, or NULL when no new
  * ACC sample arrived this tick (32 Hz ACC = every other call).

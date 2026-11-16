@@ -6,5 +6,6 @@
 #define TV_N_EXPECTED 57
 extern const uint32_t tv_ppg[TV_N_PPG];
 extern const int16_t  tv_acc[TV_N_PPG / 2 * 3];
-extern const uint16_t tv_expected_bins[TV_N_EXPECTED];
+extern const uint16_t tv_expected_bins[TV_N_EXPECTED];      /* DSP mode */
+extern const uint16_t tv_expected_bins_nn[TV_N_EXPECTED];   /* INT8 NN mode */
 #endif

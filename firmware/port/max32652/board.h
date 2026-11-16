@@ -10,5 +10,6 @@ void uart_puts(const char *s);
 void uart_putu(uint32_t v);
 void uart_puti(int32_t v);
 void bench_mark(uint32_t id);
+uint32_t stack_high_water(void);   /* startup.c: bytes of stack used so far */
 
 #endif
