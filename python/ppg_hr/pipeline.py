@@ -99,17 +99,37 @@ def estimate_hr(subj: Subject, cfg: Config) -> np.ndarray:
     """One BPM estimate per reference window (same length as subj.hr_ref)."""
     acc = acc_at_ppg_rate(subj) if (cfg.lms or cfg.acc_mask) else None
     ppg = preprocess(subj, cfg, acc)
+    return estimate_windows(ppg, acc, cfg, len(subj.hr_ref))
+
+
+def estimate_signal(ppg: np.ndarray, motion: np.ndarray | None, cfg: Config) -> np.ndarray:
+    """Same pipeline on plain arrays at 64 Hz (e.g. the webcam signal): ppg (N,), motion
+    (N, C) reference or None. Returns one BPM per 8 s window, 2 s hop."""
+    x = np.asarray(ppg, dtype=np.float64)
+    ref = None if motion is None else bandpass(np.asarray(motion, dtype=np.float64), FS_PPG, axis=0)
+    if cfg.bandpass:
+        x = bandpass(x, FS_PPG)
+    if cfg.lms and ref is not None:
+        x = nlms(x, ref, cfg.lms_taps, cfg.lms_mu, cfg.lms_eps)
+    if ref is None:
+        cfg = Config(**{**cfg.__dict__, "acc_mask": 0.0})
+    n = max(0, (len(x) - HR_WINDOW_S * FS_PPG) // (HR_SHIFT_S * FS_PPG) + 1)
+    return estimate_windows(x, ref, cfg, n)
+
+
+def estimate_windows(ppg: np.ndarray, acc: np.ndarray | None, cfg: Config, n_windows: int) -> np.ndarray:
+    """Spectrum + (ACC mask) + peak selection over 8 s windows of preprocessed signals."""
     freqs = np.fft.rfftfreq(NFFT, 1 / FS_PPG)
     band = (freqs >= F_LO) & (freqs <= F_HI)
     win, hop = HR_WINDOW_S * FS_PPG, HR_SHIFT_S * FS_PPG
 
-    out = np.empty(len(subj.hr_ref))
+    out = np.empty(n_windows)
     score = None
     for k in range(len(out)):
         s = slice(k * hop, k * hop + win)
         mag = spectrum(ppg[s], FS_PPG, NFFT)[1][band]
         if cfg.acc_mask:
-            acc_mag = sum(spectrum(acc[s, i], FS_PPG, NFFT)[1][band] for i in range(3))
+            acc_mag = sum(spectrum(acc[s, i], FS_PPG, NFFT)[1][band] for i in range(acc.shape[1]))
             mag = acc_mask(mag, acc_mag, cfg.acc_mask)
         if cfg.hmm:
             score = hmm_track_step(score, mag, cfg.hmm_max_jump, cfg.hmm_penalty)

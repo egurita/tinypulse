@@ -1,0 +1,68 @@
+[
+  {
+    "file": "20261122-180130_still.npz",
+    "label": "still",
+    "ref": 80.0,
+    "seconds": 59.98405133400229,
+    "fps": 28.62427531677423,
+    "face_found_pct": 99.94175888177053,
+    "green": {
+      "median_bpm": 37.5,
+      "abs_err_median": 42.5,
+      "window_mae": 41.339285714285715
+    },
+    "POS": {
+      "median_bpm": 35.625,
+      "abs_err_median": 44.375,
+      "window_mae": 44.642857142857146
+    },
+    "POS + motion": {
+      "median_bpm": 103.125,
+      "abs_err_median": 23.125,
+      "window_mae": 18.720238095238095
+    },
+    "firmware DSP (C)": {
+      "median_bpm": 84.375,
+      "abs_err_median": 4.375,
+      "window_mae": 5.535714285714286
+    },
+    "firmware INT8 NN (C)": {
+      "median_bpm": 86.25,
+      "abs_err_median": 6.25,
+      "window_mae": 6.160714285714286
+    }
+  },
+  {
+    "file": "20261122-180651_talking.npz",
+    "label": "talking",
+    "ref": 91.0,
+    "seconds": 59.97103375000006,
+    "fps": 28.697187498456255,
+    "face_found_pct": 100.0,
+    "green": {
+      "median_bpm": 39.375,
+      "abs_err_median": 51.625,
+      "window_mae": 52.42857142857143
+    },
+    "POS": {
+      "median_bpm": 45.0,
+      "abs_err_median": 46.0,
+      "window_mae": 49.57142857142857
+    },
+    "POS + motion": {
+      "median_bpm": 120.0,
+      "abs_err_median": 29.0,
+      "window_mae": 28.595238095238095
+    },
+    "firmware DSP (C)": {
+      "median_bpm": 120.0,
+      "abs_err_median": 29.0,
+      "window_mae": 27.970238095238095
+    },
+    "firmware INT8 NN (C)": {
+      "median_bpm": 84.375,
+      "abs_err_median": 6.625,
+      "window_mae": 10.19047619047619
+    }
+  }
+]

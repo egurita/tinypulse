@@ -104,12 +104,43 @@ Details: [`reports/stage4_results.md`](reports/stage4_results.md).
 
 ![stage 4](reports/figures/stage4_per_activity.png)
 
+## Stage 5: heart rate from the laptop webcam (remote PPG)
+
+```
+webcam frame -> YuNet face + landmarks -> forehead + cheek ROIs, skin-masked -> mean RGB
+  -> 64 Hz -> POS pulse signal -> same pipeline as the wrist (Python, or the C firmware
+     fed as sensor counts); face motion (x, y, scale) plays the accelerometer's role
+```
+
+- Live demo: `uv run python python/scripts/webcam_demo.py` (face box, ROIs, pulse wave, HR
+  updated every second). Only per-frame colour averages are ever saved, never images.
+- Synthetic tests: POS recovers 55-130 BPM and ignores lighting flicker 30x stronger than
+  the pulse that fools the green channel; irregular frame timing; ROI geometry; skin mask.
+
+**Preliminary** results, 2 x 60 s recordings, smartwatch reference (median HR, in brackets
+the mean error of the 8 s windows, BPM):
+
+| recording | watch | green | POS | POS + motion | firmware DSP (C) | firmware INT8 NN (C) |
+|---|---|---|---|---|---|---|
+| still | 80 | 38 (41.3) | 36 (44.6) | 103 (18.7) | **84 (5.5)** | 86 (6.2) |
+| talking | 91 | 39 (52.4) | 45 (49.6) | 120 (28.6) | 120 (28.0) | **84 (10.2)** |
+
+What these show: the pulse holds only ~10% of the in-band power in these recordings (face
+~140 px wide, macOS auto exposure / white balance, room lighting), and a slow ~0.6 Hz
+component (head sway / breathing) wins the spectrum for the motion-unaware methods. Using
+face motion as the artifact reference helps; the INT8 network, trained only on wrist PPG,
+transfers best while talking. To do: closer framing + frontal light, a "moving" recording,
+forehead-only ROI while talking. Details: [`reports/stage5_results.md`](reports/stage5_results.md).
+
+![stage 5](reports/figures/stage5_recordings.png)
+
 ## Layout
 ```
 python/ppg_hr/     library code (data loading, DSP, models)
 python/scripts/    runnable scripts (data prep, plots, evaluation, training, code generation)
 firmware/          C firmware: DSP + INT8 NN, MAX30102 driver, SIL app (Stages 2-4)
 models/stage4/     trained LOSO folds (PyTorch) + deployed INT8 model
+models/face/       YuNet face detector (ONNX, sha256-pinned)
 tests/python/      pytest suites
 reports/figures/   generated plots
 data/              dataset (git-ignored)
@@ -126,4 +157,6 @@ uv run python python/scripts/run_stage1.py   # all variants, all subjects -> rep
 uv run python python/scripts/train_stage4.py spec   # LOSO training (also: time)
 uv run python python/scripts/gen_nn_model.py S5     # INT8 export of the deployed fold
 uv run python python/scripts/run_stage4.py          # DSP vs NN report
+uv run python python/scripts/webcam_demo.py --seconds 60 --save still --ref 72  # Stage 5
+uv run python python/scripts/run_stage5.py          # webcam recordings vs reference
 ```
