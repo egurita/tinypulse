@@ -182,8 +182,12 @@ start
             fd = os.open(os.path.realpath(pty_link), os.O_RDWR | os.O_NOCTTY)
             tty.setraw(fd)
             link = _Link(fd)
-            # READY may be printed before we attach; sync by the first reply instead.
-            link.wait_for("READY", 5)
+            # the firmware repeats READY until it hears from us, so attaching late is fine
+            assert link.wait_for("READY", 30), "emulated firmware did not boot"
+            # Renode is still warming up (JIT) right after boot: on slow machines (CI) the
+            # guest briefly stalls while host bytes keep arriving, and the emulated UART's
+            # small RX FIFO overflows. A real UART at a fixed baud rate has no such stall.
+            time.sleep(2.0)
             t = time.perf_counter()
             link.stream(frames, rate_hz)
             link.wait_for("DONE", timeout)
